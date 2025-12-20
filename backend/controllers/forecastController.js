@@ -234,6 +234,13 @@ const generateForecast = async (req, res) => {
         chartLabels = pythonRes.data.chartLabels;
         chartData = pythonRes.data.chartData;
         modelUsed = pythonRes.data.model_used;
+
+        // Extract optimization metrics if available
+        if (pythonRes.data.optimization_metrics) {
+          console.log("Optimization Metrics Received:", pythonRes.data.optimization_metrics);
+          // We can attach this to the response or use it to adjust the confidence/quantity logic below
+          // For now, let's keep it in the response data
+        }
       }
     } catch (metricErr) {
       console.error("Python ML Service Error:", metricErr.message);
@@ -294,7 +301,8 @@ const generateForecast = async (req, res) => {
         materials: forecastedMaterials,
         chartLabels: chartLabels,
         chartData: chartData,
-        modelInfo: modelUsed
+        modelInfo: modelUsed,
+        optimizationMetrics: pythonRes?.data?.optimization_metrics || null
       }
     });
 

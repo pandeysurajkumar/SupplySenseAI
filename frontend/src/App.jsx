@@ -11,6 +11,7 @@ import Suppliers from './pages/Suppliers';
 import Settings from './pages/Settings';
 
 import InventoryOptimization from './pages/InventoryOptimization';
+import UserDashboard from './pages/UserDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -19,7 +20,7 @@ const ProtectedRoute = ({ children }) => {
 
 const AdminRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  return user.role === 'admin' ? children : <Navigate to="/app/dashboard" replace />;
+  return user.role === 'admin' ? children : <Navigate to="/app/user-dashboard" replace />;
 };
 
 function App() {
@@ -37,7 +38,8 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+          <Route path="user-dashboard" element={<UserDashboard />} />
           <Route path="forecasting" element={<Forecasting />} />
           <Route path="inventory" element={<InventoryOptimization />} />
           <Route path="materials" element={<Materials />} />

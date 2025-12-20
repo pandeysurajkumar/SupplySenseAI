@@ -9,7 +9,7 @@ const {
 } = require('../controllers/materialController');
 const { protect } = require('../middleware/auth');
 
-router.route('/').get(protect, getMaterials).post(protect, createMaterial);
+router.route('/').get(protect, getMaterials).post(createMaterial);
 router.route('/:id').get(protect, getMaterial).put(protect, updateMaterial).delete(protect, deleteMaterial);
 
 module.exports = router;

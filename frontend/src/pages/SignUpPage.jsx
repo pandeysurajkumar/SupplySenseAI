@@ -8,7 +8,11 @@ const SignUpPage = () => {
         email: '',
         fullName: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        roles: {
+            user: true,
+            admin: false
+        }
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -24,12 +28,18 @@ const SignUpPage = () => {
             return;
         }
 
+        // Determine effective role: if admin is checked (even if user is also checked), role is 'admin'.
+        // If only user is checked, role is 'user'.
+        // If neither, default to 'user' (or handle error, but let's default).
+        const finalRole = formData.roles.admin ? 'admin' : 'user';
+
         try {
             const response = await api.post('/auth/register', {
                 username: formData.username,
                 email: formData.email,
                 fullName: formData.fullName,
-                password: formData.password
+                password: formData.password,
+                role: finalRole
             });
 
             navigate('/login', { state: { message: 'Account created successfully! Please log in.' } });
@@ -93,6 +103,27 @@ const SignUpPage = () => {
                         className="w-full px-4 py-3 bg-slate-700 border border-slate-600 placeholder-slate-400 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400"
                         placeholder="Confirm Password"
                     />
+
+                    <div className="flex justify-center space-x-6 mb-4">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.roles.user}
+                                onChange={() => setFormData(prev => ({ ...prev, roles: { ...prev.roles, user: !prev.roles.user } }))}
+                                className="w-4 h-4 text-teal-400 bg-slate-700 border-slate-600 rounded focus:ring-teal-400"
+                            />
+                            <span className="text-slate-300">User</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.roles.admin}
+                                onChange={() => setFormData(prev => ({ ...prev, roles: { ...prev.roles, admin: !prev.roles.admin } }))}
+                                className="w-4 h-4 text-teal-400 bg-slate-700 border-slate-600 rounded focus:ring-teal-400"
+                            />
+                            <span className="text-slate-300">Admin</span>
+                        </label>
+                    </div>
 
                     <button
                         type="submit"

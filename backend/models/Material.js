@@ -54,17 +54,7 @@ const materialSchema = mongoose.Schema(
   }
 );
 
-// Calculate status based on stock
-materialSchema.pre('save', function (next) {
-  if (this.currentStock === 0) {
-    this.status = 'Out of Stock';
-  } else if (this.currentStock <= this.reorderLevel) {
-    this.status = 'Low Stock';
-  } else {
-    this.status = 'In Stock';
-  }
-  next();
-});
+// Status will be calculated in the controller
 
 module.exports = mongoose.model('Material', materialSchema);
 

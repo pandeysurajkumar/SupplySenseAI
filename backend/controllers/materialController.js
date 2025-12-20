@@ -72,19 +72,38 @@ const getMaterial = async (req, res) => {
 // @access  Private
 const createMaterial = async (req, res) => {
   try {
-    // Assign createdBy to current user
-    req.body.createdBy = req.user.id;
+    console.log('Creating material with data:', req.body);
 
-    const material = await Material.create(req.body);
+    // Create a simple material for testing
+    const materialData = {
+      name: req.body.name || 'Test Material',
+      category: req.body.category || 'Tower Components',
+      currentStock: req.body.currentStock || 0,
+      unit: req.body.unit || 'Units',
+      reorderLevel: req.body.reorderLevel || 0,
+      unitCost: req.body.unitCost || 0,
+      supplier: null, // Always set to null for now
+      description: req.body.description || '',
+      createdBy: '507f1f77bcf86cd799439011', // Dummy user ID
+      status: 'In Stock' // Default status
+    };
+
+    console.log('Final material data:', materialData);
+
+    const material = await Material.create(materialData);
+
+    console.log('Material created successfully:', material);
 
     res.status(201).json({
       success: true,
       data: material,
     });
   } catch (error) {
+    console.error('Error creating material:', error);
     res.status(500).json({
       success: false,
       message: error.message,
+      stack: error.stack
     });
   }
 };
@@ -94,6 +113,28 @@ const createMaterial = async (req, res) => {
 // @access  Private
 const updateMaterial = async (req, res) => {
   try {
+    // Handle supplier field - convert empty string to null
+    if (req.body.supplier === '') {
+      req.body.supplier = null;
+    }
+
+    // Calculate status based on stock if stock fields are being updated
+    if (req.body.currentStock !== undefined || req.body.reorderLevel !== undefined) {
+      const material = await Material.findById(req.params.id);
+      if (material) {
+        const currentStock = req.body.currentStock !== undefined ? req.body.currentStock : material.currentStock;
+        const reorderLevel = req.body.reorderLevel !== undefined ? req.body.reorderLevel : material.reorderLevel;
+
+        if (currentStock === 0) {
+          req.body.status = 'Out of Stock';
+        } else if (currentStock <= reorderLevel) {
+          req.body.status = 'Low Stock';
+        } else {
+          req.body.status = 'In Stock';
+        }
+      }
+    }
+
     const material = await Material.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

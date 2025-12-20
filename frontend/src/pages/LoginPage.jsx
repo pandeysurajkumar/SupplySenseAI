@@ -5,21 +5,29 @@ import api from '../utils/api';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
+
     try {
       // Backend authController expects 'username' field which can be email or username
       const response = await api.post('/auth/login', { username: username, password });
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
-      navigate('/app/dashboard');
+      localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.data));
+
+      if (response.data.data.role === 'admin') {
+        navigate('/app/dashboard');
+      } else {
+        navigate('/app/user-dashboard');
+      }
     } catch (error) {
       console.error('Login error:', error);
-      alert(error.response?.data?.error || 'Invalid credentials');
+      setError(error.response?.data?.message || 'Invalid credentials');
     }
   };
 
@@ -40,6 +48,13 @@ const LoginPage = () => {
             <p className="text-sm text-green-400">{location.state.message}</p>
           </div>
         )}
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-md">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div>
             <label htmlFor="username" className="sr-only">Username</label>
@@ -49,7 +64,10 @@ const LoginPage = () => {
               type="email"
               required
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setError(''); // Clear error when user starts typing
+              }}
               className="relative block w-full px-4 py-3 bg-slate-700 border border-slate-600 placeholder-slate-400 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm"
               placeholder="Username"
             />
@@ -62,7 +80,10 @@ const LoginPage = () => {
               type="password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(''); // Clear error when user starts typing
+              }}
               className="relative block w-full px-4 py-3 bg-slate-700 border border-slate-600 placeholder-slate-400 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm"
               placeholder="Password"
             />

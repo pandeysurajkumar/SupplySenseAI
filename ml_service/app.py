@@ -73,11 +73,36 @@ def predict():
         # In real life, history would be normalized per unit of budget. 
         final_predictions = predictions * budget_multiplier
         
+        # 7. Inventory Optimization (Safety Stock & Reorder Point)
+        # We calculate the standard deviation of the forecasted demand to estimate volatility.
+        # Service Level of 95% implies Z-score approx 1.645
+        
+        forecast_std = np.std(final_predictions)
+        avg_demand = np.mean(final_predictions)
+        
+        # Lead time (assume 1 month for simplicity, or 30 days)
+        lead_time_months = 1
+        
+        # Safety Stock = Z * std_dev * sqrt(lead_time)
+        z_score = 1.645
+        safety_stock = z_score * forecast_std * np.sqrt(lead_time_months)
+        
+        # Reorder Point = (Avg Daily Demand * Lead Time Days) + Safety Stock
+        # Here we work in months, so: (Avg Monthly Demand * Lead Time Months) + Safety Stock
+        reorder_point = (avg_demand * lead_time_months) + safety_stock
+        
+        optimization_metrics = {
+             "safety_stock": round(safety_stock),
+             "reorder_point": round(reorder_point),
+             "average_monthly_demand": round(avg_demand)
+        }
+        
         result = {
             "success": True,
             "chartLabels": future_dates,
             "chartData": [round(x) for x in final_predictions.tolist()],
-            "model_used": "RandomForestRegressor",
+            "optimization_metrics": optimization_metrics,
+            "model_used": "RandomForestRegressor + InventoryOpt",
             "message": "Forecast generated successfully using Python ML"
         }
         

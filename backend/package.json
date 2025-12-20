@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "ml_service": "cd ../ml_service && python app.py",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
