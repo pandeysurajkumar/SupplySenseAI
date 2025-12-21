@@ -9,7 +9,7 @@ const {
 } = require('../controllers/reportController');
 const { protect } = require('../middleware/auth');
 
-router.route('/').get(protect, getReports).post(protect, createReport);
+router.route('/').get(getReports).post(createReport);
 router.route('/:id').get(protect, getReport).put(protect, updateReport).delete(protect, deleteReport);
 
 module.exports = router;

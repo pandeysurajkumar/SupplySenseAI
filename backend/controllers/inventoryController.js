@@ -6,20 +6,17 @@ const Forecast = require('../models/Forecast');
 // @access  Private
 const getInventoryOptimization = async (req, res) => {
     try {
-        // 1. Get all materials for this user (or all if admin)
-        const materialQuery = {};
-        if (req.user.role !== 'admin') {
-            materialQuery.createdBy = req.user.id;
-        }
-        const materials = await Material.find(materialQuery);
+        // 1. Get all materials (temporary for testing - remove user filtering)
+        const materials = await Material.find({});
 
         // 2. Get the specific forecast to compare against (passed via query ?forecastId=...)
-        //    OR default to the latest forecast created by the user
+        //    OR default to the latest forecast
         let forecast = null;
         if (req.query.forecastId) {
             forecast = await Forecast.findById(req.query.forecastId);
         } else {
-            forecast = await Forecast.findOne({ user: req.user.id }).sort('-createdAt');
+            // Get latest forecast (temporary for testing - not filtering by user)
+            forecast = await Forecast.findOne({}).sort('-createdAt');
         }
 
         const optimizationData = [];

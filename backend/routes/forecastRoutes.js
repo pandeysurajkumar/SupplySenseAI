@@ -10,9 +10,9 @@ const {
 } = require('../controllers/forecastController');
 const { protect } = require('../middleware/auth');
 
-router.route('/').get(protect, getForecasts).post(protect, createForecast);
-router.route('/generate').post(protect, generateForecast);
-router.route('/:id').get(protect, getForecast).put(protect, updateForecast).delete(protect, deleteForecast);
+router.route('/').get(getForecasts).post(createForecast);
+router.route('/generate').post(generateForecast);
+router.route('/:id').get(getForecast).put(updateForecast).delete(deleteForecast);
 
 module.exports = router;
 

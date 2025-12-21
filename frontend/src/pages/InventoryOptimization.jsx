@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const InventoryOptimization = () => {
     const [optimizationData, setOptimizationData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [forecastName, setForecastName] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchOptimizationData();
@@ -13,13 +15,48 @@ const InventoryOptimization = () => {
 
     const fetchOptimizationData = async () => {
         try {
+            setLoading(true);
             const res = await api.get('/inventory/optimization');
             setOptimizationData(res.data.data.optimizationItems);
             setForecastName(res.data.data.forecastName);
+            setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch optimization data');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRefreshAnalysis = () => {
+        // Refresh the page to reload all data
+        window.location.reload();
+    };
+
+    const handleDeleteAnalysis = async () => {
+        if (window.confirm('Are you sure you want to delete all analysis data? This will clear all forecasts and analysis results.')) {
+            try {
+                setLoading(true);
+                // Delete all forecasts from database
+                const forecastsRes = await api.get('/forecasts');
+                const forecasts = forecastsRes.data.data;
+
+                // Delete each forecast
+                for (const forecast of forecasts) {
+                    await api.delete(`/forecasts/${forecast._id}`);
+                }
+
+                // Clear local state
+                setOptimizationData([]);
+                setForecastName('No Active Forecast');
+                setError(null);
+
+                alert('All analysis data has been cleared successfully.');
+            } catch (err) {
+                console.error('Error deleting analysis:', err);
+                alert('Failed to delete analysis data. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -28,17 +65,62 @@ const InventoryOptimization = () => {
 
     return (
         <div className="fade-in">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
-                <div>
-                    <h3 className="text-xl font-semibold text-slate-800 mb-1">Inventory Optimization & Procurement</h3>
-                    <p className="text-sm text-slate-500">Analyzing stock against forecast: <span className="font-semibold text-slate-700">{forecastName}</span></p>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 className="text-xl font-semibold text-slate-800 mb-1">Inventory Optimization & Procurement</h3>
+                        <p className="text-sm text-slate-500">Analyzing stock against forecast: <span className="font-semibold text-slate-700">{forecastName}</span></p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleRefreshAnalysis}
+                            disabled={loading}
+                            className="bg-slate-100 text-slate-600 px-4 py-2 rounded-md hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                        >
+                            🔄 Refresh Analysis
+                        </button>
+                        <button
+                            onClick={handleDeleteAnalysis}
+                            disabled={loading}
+                            className="bg-red-100 text-red-600 px-4 py-2 rounded-md hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                        >
+                            🗑️ Delete Analysis
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={fetchOptimizationData}
-                    className="bg-slate-100 text-slate-600 px-4 py-2 rounded-md hover:bg-slate-200 text-sm font-medium transition-colors"
-                >
-                    Refresh Analysis
-                </button>
+
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-red-700">{error}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium text-blue-800">Analysis Information</h3>
+                            <div className="mt-2 text-sm text-blue-700">
+                                <p>• <strong>Refresh Analysis:</strong> Reloads the page to fetch latest data</p>
+                                <p>• <strong>Delete Analysis:</strong> Removes all forecasts and analysis data</p>
+                                <p>• Generate forecasts first to see meaningful analysis results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

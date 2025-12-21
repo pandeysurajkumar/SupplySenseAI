@@ -28,7 +28,7 @@ const Forecasting = () => {
       const reader = new FileReader();
       reader.onload = (evt) => {
         const text = evt.target.result;
-        // Simple CSV parser
+        // Parse CSV with material-specific data
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
         const data = [];
@@ -38,14 +38,30 @@ const Forecasting = () => {
           const values = lines[i].split(',');
           const obj = {};
           headers.forEach((h, idx) => {
-            obj[h] = values[idx]?.trim();
+            obj[headers[idx]] = values[idx]?.trim();
           });
-          // Try to normalize fields
-          if (obj['date'] && obj['quantity']) {
-            data.push({ date: obj['date'], quantity: parseFloat(obj['quantity']) });
+
+          // Handle both old and new CSV formats
+          if (obj['material_name'] && obj['date'] && obj['quantity']) {
+            // New format: material_name, date, quantity, unit
+            data.push({
+              material_name: obj['material_name'],
+              date: obj['date'],
+              quantity: parseFloat(obj['quantity']),
+              unit: obj['unit'] || 'Units'
+            });
+          } else if (obj['date'] && obj['quantity']) {
+            // Old format: date, quantity (assume generic material)
+            data.push({
+              material_name: 'General',
+              date: obj['date'],
+              quantity: parseFloat(obj['quantity']),
+              unit: 'Units'
+            });
           }
         }
         setCsvData(data);
+        console.log('Parsed CSV data:', data);
       };
       reader.readAsText(file);
     }
@@ -148,7 +164,10 @@ const Forecasting = () => {
                 onChange={handleFileChange}
                 className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
               />
-              <p className="text-xs text-slate-400 mt-1">Columns: date (YYYY-MM-DD), quantity</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Columns: date (YYYY-MM-DD), material_name, quantity, unit<br/>
+                Example: 2024-01-01,Steel Cable,150,Kilometers
+              </p>
             </div>
             <div>
               <label htmlFor="budget" className="block text-sm font-medium text-slate-700">Project Budget (₹ Crores)</label>
