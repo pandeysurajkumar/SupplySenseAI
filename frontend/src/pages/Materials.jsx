@@ -35,7 +35,8 @@ const Materials = () => {
         stock: `${m.currentStock} ${m.unit}`,
         reorder: `${m.reorderLevel} ${m.unit}`,
         cost: `₹${m.unitCost}`,
-        supplier: m.supplier?.name || 'Unknown Supplier', // Assuming populated or handled
+        supplier: m.supplier?.name || 'Unknown Supplier', // For display
+        supplierId: m.supplier?._id || null, // For editing
         status: m.status,
         date: new Date(m.updatedAt).toISOString().split('T')[0],
         // Raw fields for editing
@@ -121,7 +122,7 @@ const Materials = () => {
       unit: material.unit,
       reorderLevel: material.rawReorder,
       unitCost: material.rawCost,
-      supplier: material.supplier?._id || null,
+      supplier: material.supplierId || null,
       description: material.description
     });
     setEditingId(material.id);

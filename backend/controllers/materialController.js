@@ -72,27 +72,27 @@ const getMaterial = async (req, res) => {
 // @access  Private
 const createMaterial = async (req, res) => {
   try {
-    console.log('Creating material with data:', req.body);
+    // Assign createdBy to current user (temporary for testing)
+    req.body.createdBy = req.user ? req.user.id : '507f1f77bcf86cd799439011';
 
-    // Create a simple material for testing
-    const materialData = {
-      name: req.body.name || 'Test Material',
-      category: req.body.category || 'Tower Components',
-      currentStock: req.body.currentStock || 0,
-      unit: req.body.unit || 'Units',
-      reorderLevel: req.body.reorderLevel || 0,
-      unitCost: req.body.unitCost || 0,
-      supplier: null, // Always set to null for now
-      description: req.body.description || '',
-      createdBy: '507f1f77bcf86cd799439011', // Dummy user ID
-      status: 'In Stock' // Default status
-    };
+    // Handle supplier field - convert empty string to null
+    if (req.body.supplier === '') {
+      req.body.supplier = null;
+    }
 
-    console.log('Final material data:', materialData);
+    // Calculate status based on stock
+    const currentStock = req.body.currentStock || 0;
+    const reorderLevel = req.body.reorderLevel || 0;
 
-    const material = await Material.create(materialData);
+    if (currentStock === 0) {
+      req.body.status = 'Out of Stock';
+    } else if (currentStock <= reorderLevel) {
+      req.body.status = 'Low Stock';
+    } else {
+      req.body.status = 'In Stock';
+    }
 
-    console.log('Material created successfully:', material);
+    const material = await Material.create(req.body);
 
     res.status(201).json({
       success: true,
@@ -103,7 +103,6 @@ const createMaterial = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
-      stack: error.stack
     });
   }
 };
