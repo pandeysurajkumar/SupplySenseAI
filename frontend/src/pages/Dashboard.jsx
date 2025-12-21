@@ -1,31 +1,149 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import { formatDate, addDateFormatListener } from '../utils/dateUtils';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dateFormat, setDateFormat] = useState(localStorage.getItem('dateFormat') || 'MM/DD/YYYY');
 
-  const stats = [
-    { label: 'Total Materials', value: '5', subtext: 'Active inventory items' },
-    { label: 'Low Stock Items', value: '1', subtext: 'Requires attention', highlight: 'text-amber-600' },
-    { label: 'Recent Reports', value: '5', subtext: 'Generated this month' },
-    { label: 'System Status', value: 'Online', subtext: 'All systems operational', highlight: 'text-teal-500' }
-  ];
+  useEffect(() => {
+    fetchDashboardData();
 
-  const materials = [
-    { name: 'Galvanized Steel Towers', category: 'Tower Components', quantity: '245 Units', status: 'in-stock' },
-    { name: 'ACSR Conductor Cable', category: 'Transmission Line', quantity: '12.5 km', status: 'low-stock' },
-    { name: 'Porcelain Insulators', category: 'Sub-station Fittings', quantity: '1250 Units', status: 'in-stock' },
-    { name: 'Concrete Mix', category: 'Foundation Materials', quantity: '0 m³', status: 'out-of-stock' }
-  ];
+    // Listen for date format changes
+    const cleanup = addDateFormatListener((newFormat) => {
+      setDateFormat(newFormat);
+      // Re-format existing data with new format
+      setReports(prev => prev.map(report => ({
+        ...report,
+        date: formatDate(report.createdAt, newFormat)
+      })));
+      setMaterials(prev => prev.map(material => ({
+        ...material,
+        date: formatDate(material.updatedAt, newFormat)
+      })));
+    });
 
-  const reports = [
-    { name: 'Q4 2024 Forecast', type: 'Forecast', date: '2024-01-15', status: 'completed' },
-    { name: 'Inventory Status', type: 'Inventory', date: '2024-01-16', status: 'completed' },
-    { name: 'Material Usage', type: 'Usage', date: '2024-01-14', status: 'in-progress' },
-    { name: 'Supplier Review', type: 'Review', date: '2024-01-11', status: 'failed' }
-  ];
+    return cleanup;
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch materials
+      const materialsRes = await api.get('/materials');
+      const materialsData = materialsRes.data.data.slice(0, 4); // Show only first 4 materials
+
+      // Fetch reports
+      const reportsRes = await api.get('/reports');
+      const reportsData = reportsRes.data.data.slice(0, 4); // Show only first 4 reports
+
+      // Calculate stats
+      const totalMaterials = materialsRes.data.count;
+      const lowStockItems = materialsData.filter(m => m.currentStock <= m.reorderLevel).length;
+      const recentReports = reportsRes.data.count;
+
+      const statsData = [
+        {
+          label: 'Total Materials',
+          value: totalMaterials.toString(),
+          subtext: 'Active inventory items'
+        },
+        {
+          label: 'Low Stock Items',
+          value: lowStockItems.toString(),
+          subtext: 'Requires attention',
+          highlight: lowStockItems > 0 ? 'text-amber-600' : ''
+        },
+        {
+          label: 'Recent Reports',
+          value: recentReports.toString(),
+          subtext: 'Generated reports'
+        },
+        {
+          label: 'System Status',
+          value: 'Online',
+          subtext: 'All systems operational',
+          highlight: 'text-teal-500'
+        }
+      ];
+
+      // Format materials for display
+      const formattedMaterials = materialsData.map(material => ({
+        name: material.name,
+        category: material.category,
+        quantity: `${material.currentStock} ${material.unit}`,
+        status: material.status === 'In Stock' ? 'in-stock' :
+                material.status === 'Low Stock' ? 'low-stock' : 'out-of-stock',
+        updatedAt: material.updatedAt // Keep original for re-formatting
+      }));
+
+      // Format reports for display
+      const formattedReports = reportsData.map(report => ({
+        name: report.name,
+        type: report.type,
+        date: formatDate(report.createdAt),
+        status: report.status === 'Completed' ? 'completed' :
+                report.status === 'In Progress' ? 'in-progress' : 'failed',
+        createdAt: report.createdAt // Keep original for re-formatting
+      }));
+
+      setStats(statsData);
+      setMaterials(formattedMaterials);
+      setReports(formattedReports);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Set default empty state on error
+      setStats([
+        { label: 'Total Materials', value: '0', subtext: 'Active inventory items' },
+        { label: 'Low Stock Items', value: '0', subtext: 'Requires attention' },
+        { label: 'Recent Reports', value: '0', subtext: 'Generated reports' },
+        { label: 'System Status', value: 'Online', subtext: 'All systems operational', highlight: 'text-teal-500' }
+      ]);
+      setMaterials([]);
+      setReports([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fade-in">
+        <div className="text-center py-10">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+          <p className="mt-2 text-slate-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">
+      {/* Dashboard Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Dashboard Overview</h1>
+          <p className="text-slate-600 mt-1">Monitor your supply chain and generate insights</p>
+        </div>
+        <button
+          onClick={fetchDashboardData}
+          disabled={loading}
+          className="bg-slate-100 text-slate-600 px-4 py-2 rounded-md hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {stats.map((stat, idx) => (
@@ -48,20 +166,32 @@ const Dashboard = () => {
             </button>
           </div>
           <div className="space-y-4">
-            {materials.map((material, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50">
-                <div>
-                  <p className="font-medium text-slate-700">{material.name}</p>
-                  <p className="text-sm text-slate-500">{material.category}</p>
+            {materials.length > 0 ? (
+              materials.map((material, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50">
+                  <div>
+                    <p className="font-medium text-slate-700">{material.name}</p>
+                    <p className="text-sm text-slate-500">{material.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-700">{material.quantity}</p>
+                    <span className={`status-badge status-${material.status}`}>
+                      {material.status === 'in-stock' ? 'In Stock' : material.status === 'low-stock' ? 'Low Stock' : 'Out of Stock'}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-slate-700">{material.quantity}</p>
-                  <span className={`status-badge status-${material.status}`}>
-                    {material.status === 'in-stock' ? 'In Stock' : material.status === 'low-stock' ? 'Low Stock' : 'Out of Stock'}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <p className="text-sm">No materials found</p>
+                <button
+                  onClick={() => navigate('/app/materials')}
+                  className="mt-2 text-teal-500 hover:text-teal-600 text-sm font-medium"
+                >
+                  Add your first material →
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -74,20 +204,32 @@ const Dashboard = () => {
             </button>
           </div>
           <div className="space-y-4">
-            {reports.map((report, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50">
-                <div>
-                  <p className="font-medium text-slate-700">{report.name}</p>
-                  <p className="text-sm text-slate-500">{report.type}</p>
+            {reports.length > 0 ? (
+              reports.map((report, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50">
+                  <div>
+                    <p className="font-medium text-slate-700">{report.name}</p>
+                    <p className="text-sm text-slate-500">{report.type}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-slate-500">{report.date}</p>
+                    <span className={`status-badge status-${report.status}`}>
+                      {report.status === 'completed' ? 'Completed' : report.status === 'in-progress' ? 'In Progress' : 'Failed'}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-500">{report.date}</p>
-                  <span className={`status-badge status-${report.status}`}>
-                    {report.status === 'completed' ? 'Completed' : report.status === 'in-progress' ? 'In Progress' : 'Failed'}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <p className="text-sm">No reports generated yet</p>
+                <button
+                  onClick={() => navigate('/app/reports')}
+                  className="mt-2 text-teal-500 hover:text-teal-600 text-sm font-medium"
+                >
+                  Generate your first report →
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

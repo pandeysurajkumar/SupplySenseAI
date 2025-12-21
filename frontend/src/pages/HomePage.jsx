@@ -40,7 +40,7 @@ const HomePage = () => {
             <svg className="h-8 w-auto text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75" />
             </svg>
-            <span className="ml-3 font-bold text-xl text-gray-800">POWERGRID</span>
+            <span className="ml-3 font-bold text-xl text-gray-800">SUPPLYSENSEAI</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <button onClick={() => scrollToSection('hero-section')} className="text-gray-600 hover:text-blue-600 font-medium">Home</button>
@@ -133,7 +133,7 @@ const HomePage = () => {
             <div className="text-center mb-16">
               <span className="text-sm font-bold uppercase text-blue-600 tracking-widest">The Challenge</span>
               <h2 className="text-4xl font-bold text-slate-800 mt-2">The Complexity of Scale</h2>
-              <p className="text-slate-600 mt-4 max-w-3xl mx-auto">POWERGRID executes numerous national projects. Mismanaged materials can cause significant cost overruns and operational inefficiencies across diverse variables.</p>
+              <p className="text-slate-600 mt-4 max-w-3xl mx-auto">SUPPLYSENSEAI helps organizations manage supply chain and material forecasting. Mismanaged materials can cause significant cost overruns and operational inefficiencies across diverse variables.</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center max-w-6xl mx-auto">
               {['Budgets', 'Locations', 'Tower Types', 'Sub-stations', 'Taxes', 'Geography'].map((item, idx) => (
@@ -269,7 +269,7 @@ const HomePage = () => {
         <div className="container mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-bold text-lg">POWERGRID</h3>
+              <h3 className="font-bold text-lg">SUPPLYSENSEAI</h3>
               <p className="text-slate-400 mt-2 text-sm">AI-Powered Material Demand Forecasting</p>
             </div>
             <div>
@@ -305,7 +305,7 @@ const HomePage = () => {
             </div>
           </div>
           <div className="border-t border-slate-700 mt-8 py-6 text-center text-sm text-slate-400">
-            <p>&copy; 2025 POWERGRID Corporation of India Ltd. All rights reserved.</p>
+            <p>&copy; 2025 SUPPLYSENSEAI. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -39,8 +39,7 @@ const LoginPage = () => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75" />
           </svg>
         </div>
-        <h2 className="text-3xl font-bold text-white">POWERGRID</h2>
-        <h2 className="text-3xl font-bold text-white">POWERGRID</h2>
+        <h2 className="text-3xl font-bold text-white">SUPPLYSENSEAI</h2>
         <p className="text-slate-400">Material Demand Forecasting System</p>
 
         {location.state?.message && (
@@ -93,17 +92,6 @@ const LoginPage = () => {
             className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-md text-slate-900 bg-teal-400 hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-teal-500 transition-colors duration-300"
           >
             Sign in
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setUsername('admin@gmail.com');
-              setPassword('password123');
-            }}
-            className="w-full flex justify-center py-3 px-4 mt-3 border border-slate-600 text-sm font-semibold rounded-md text-slate-300 bg-transparent hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-slate-500 transition-colors duration-300"
-          >
-            Login as Admin
           </button>
 
           <p className="text-sm text-slate-500 mt-4">

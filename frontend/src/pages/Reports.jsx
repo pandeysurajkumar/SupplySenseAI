@@ -227,26 +227,26 @@ ${report.data ? JSON.stringify(report.data, null, 2) : 'No detailed data availab
           <p className="text-sm">Click "Generate Report" to create a new report.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {reports.map((report) => (
             <div key={report._id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-slate-800">{report.name}</h4>
-                  <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h4 className="text-lg font-semibold text-slate-800">{report.name}</h4>
+                <div className="flex items-center gap-4 mt-2">
                     <span className={`status-badge status-${report.type.toLowerCase()}`}>
-                      {report.type}
-                    </span>
-                    <span className={`status-badge status-${report.status.toLowerCase().replace(' ', '-')}`}>
-                      {report.status}
-                    </span>
+                    {report.type}
+                  </span>
+                  <span className={`status-badge status-${report.status.toLowerCase().replace(' ', '-')}`}>
+                    {report.status}
+                  </span>
                     <span className="text-sm text-slate-500">Size: {formatFileSize(report)}</span>
-                  </div>
+                </div>
                   {report.description && (
                     <p className="text-sm text-slate-600 mt-2">{report.description}</p>
                   )}
-                </div>
-                <div className="flex items-center gap-4">
+              </div>
+              <div className="flex items-center gap-4">
                   <span className="text-sm text-slate-500">
                     {new Date(report.createdAt).toLocaleDateString()}
                   </span>
@@ -267,11 +267,11 @@ ${report.data ? JSON.stringify(report.data, null, 2) : 'No detailed data availab
                   >
                     View
                   </button>
-                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
       )}
 
       {/* Generate Report Modal */}

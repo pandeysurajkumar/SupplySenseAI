@@ -312,7 +312,7 @@ const generateForecast = async (req, res) => {
           }
         } catch (materialErr) {
           console.log(`ML prediction failed for ${dbMaterial.name}, using fallback`);
-        }
+      }
       }
 
       // Fallback calculation if no historical data or ML failed

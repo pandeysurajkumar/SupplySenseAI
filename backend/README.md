@@ -1,6 +1,6 @@
 # SupplySenseAI Backend API
 
-Backend API for POWERGRID Material Demand Forecasting System built with Node.js, Express, and MongoDB.
+Backend API for SUPPLYSENSEAI Supply Chain Intelligence System built with Node.js, Express, and MongoDB.
 
 ## Features
 
