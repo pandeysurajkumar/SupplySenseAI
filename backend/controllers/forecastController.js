@@ -217,10 +217,11 @@ const generateForecast = async (req, res) => {
     let chartLabels = [];
     let chartData = [];
     let modelUsed = "Simulation (Python Service Unavailable)";
+    let pythonRes = null; // Declare outside try block
 
     try {
       // Try calling Python Service
-      const pythonRes = await axios.post('http://localhost:5001/predict', {
+      pythonRes = await axios.post('http://localhost:5001/predict', {
         history: historyPayload,
         params: {
           budget,
