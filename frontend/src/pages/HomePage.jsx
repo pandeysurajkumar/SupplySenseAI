@@ -251,7 +251,7 @@ const HomePage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-slate-900 text-white">
+        {/* <section className="bg-slate-900 text-white">
           <div className="container mx-auto px-6 py-20 text-center">
             <h2 className="text-4xl font-bold">Start Optimizing Your Projects Today</h2>
             <p className="mt-4 max-w-2xl mx-auto text-slate-300">Leverage AI to forecast materials demand and streamline your supply chain. See the difference for yourself.</p>
@@ -261,7 +261,7 @@ const HomePage = () => {
               </button>
             </div>
           </div>
-        </section>
+        </section> */}
       </main>
 
       {/* Footer */}
