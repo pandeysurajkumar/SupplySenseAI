@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import datetime
+import os
 
 app = Flask(__name__)
 
@@ -111,5 +112,8 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
